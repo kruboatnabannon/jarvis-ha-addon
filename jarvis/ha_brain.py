@@ -20,12 +20,18 @@ class JarvisHABrain:
         self.ha = HomeAssistantClient()
         self.api_key = os.getenv("GEMINI_API_KEY", "").strip()
         self.mac_agent_url = os.getenv("MAC_AGENT_URL", "http://192.168.1.100:5050").rstrip("/")
-        self.model = None
+        self.chat_session = None
 
         if HAS_GEMINI and self.api_key:
             try:
-                genai.configure(api_key=self.api_key)
-                self.model = genai.GenerativeModel("gemini-2.5-flash")
+                genai.configure(api_key=self.api_key, transport="rest")
+                system_prompt = (
+                    "คุณคือ J.A.R.V.I.S. ผู้ช่วยส่วนตัวรอบด้านของเจ้านาย "
+                    "คุณกำลังรันอยู่บนเซิร์ฟเวอร์ Home Assistant ประจำบ้าน "
+                    "ตอบกระชับ 1-2 ประโยค สุภาพ สุขุม ลงท้าย 'ครับเจ้านาย' เสมอ"
+                )
+                self.model = genai.GenerativeModel("gemini-3.5-flash-lite", system_instruction=system_prompt)
+                self.chat_session = self.model.start_chat(history=[])
                 print("🧠 [J.A.R.V.I.S. Brain]: เชื่อมต่อสมอง Gemini Flash บน Home Assistant สำเร็จ!")
             except Exception as e:
                 print(f"⚠️ [J.A.R.V.I.S. Brain]: ไม่สามารถเปิดใช้ Gemini: {e}")
@@ -106,36 +112,49 @@ class JarvisHABrain:
         clean = text.strip()
         clean_lower = clean.lower()
 
+        # บันทึก Action ที่เกิดขึ้นลงใน Chat Session สำหรับคุยต่อเนื่อง
+        def _record(query: str, ans: str):
+            if self.chat_session:
+                try:
+                    from google.generativeai.types import content_types
+                    self.chat_session.history.append(content_types.to_content({'role': 'user', 'parts': [query]}))
+                    self.chat_session.history.append(content_types.to_content({'role': 'model', 'parts': [ans]}))
+                    if len(self.chat_session.history) > 30:
+                        self.chat_session.history = self.chat_session.history[-30:]
+                except Exception:
+                    pass
+
         # 1. ทักทาย
         if any(w in clean_lower for w in ["สวัสดี", "หวัดดี", "ฮัลโหล", "ดีครับ"]):
-            return "สวัสดีครับเจ้านาย จาวิสพร้อมรับใช้ตลอด 24 ชั่วโมงบน Home Assistant แล้วครับ"
+            ans = "สวัสดีครับเจ้านาย จาวิสพร้อมรับใช้ตลอด 24 ชั่วโมงบน Home Assistant แล้วครับ"
+            _record(clean, ans)
+            return ans
 
         # 2. เวลา / วันที่
         if any(w in clean_lower for w in ["กี่โมง", "เวลา", "วันอะไร", "วันที่", "เดือน", "ปี"]):
-            return self.get_time_info(clean)
+            ans = self.get_time_info(clean)
+            _record(clean, ans)
+            return ans
 
         # 3. คำสั่งสำหรับ Mac โดยตรง (เปิดเพลง, YouTube, ข้ามโฆษณา)
         if any(w in clean_lower for w in ["เพลง", "youtube", "ยูทูป", "ข้ามโฆษณา", "เต็มจอ"]):
             mac_res = self.forward_to_mac(clean)
             if mac_res:
+                _record(clean, mac_res)
                 return mac_res
 
         # 4. ตรวจสอบคำสั่ง Home Assistant (เปิด/ปิดไฟ แอร์ สวิตช์)
         ha_res = self.handle_homeassistant_action(clean)
         if ha_res:
+            _record(clean, ha_res)
             return ha_res
 
-        # 5. ใช้ Gemini ประมวลผลบทสนทนาอัจฉริยะรอบด้าน
-        if self.model:
+        # 5. ใช้ Gemini ประมวลผลบทสนทนาอัจฉริยะต่อเนื่อง (Multi-turn Conversation)
+        if self.chat_session:
             try:
-                system_prompt = (
-                    "คุณคือ J.A.R.V.I.S. ผู้ช่วยส่วนตัวรอบด้านของเจ้านาย "
-                    "คุณกำลังรันอยู่บนเซิร์ฟเวอร์ Home Assistant ประจำบ้าน "
-                    "ตอบกระชับ 1-2 ประโยค สุภาพ สุขุม ลงท้าย 'ครับเจ้านาย' เสมอ"
-                )
-                response = self.model.generate_content([system_prompt, clean])
-                if response and response.text:
-                    return response.text.strip()
+                resp = self.chat_session.send_message(clean)
+                if resp and resp.text:
+                    return resp.text.strip()
             except Exception as e:
                 print(f"⚠️ [Gemini Error]: {e}")
 
