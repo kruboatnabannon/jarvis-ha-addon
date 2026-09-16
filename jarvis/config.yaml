@@ -1,0 +1,22 @@
+name: "J.A.R.V.I.S. Brain Core"
+description: "ระบบสมองกลาง AI ผู้ช่วยส่วนตัวรอบด้าน (J.A.R.V.I.S.) เชื่อมต่อ Home Assistant 24 ชม."
+version: "1.0.0"
+slug: "jarvis_brain"
+init: false
+arch:
+  - amd64
+startup: services
+boot: auto
+homeassistant_api: true
+hassio_api: true
+hassio_role: default
+ports:
+  5050/tcp: 5050
+options:
+  gemini_api_key: ""
+  mac_agent_url: "http://192.168.1.100:5050"
+  speech_language: "th"
+schema:
+  gemini_api_key: password?
+  mac_agent_url: str?
+  speech_language: list(th|en)?
