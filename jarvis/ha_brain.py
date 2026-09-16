@@ -30,7 +30,7 @@ class JarvisHABrain:
                     "คุณกำลังรันอยู่บนเซิร์ฟเวอร์ Home Assistant ประจำบ้าน "
                     "ตอบกระชับ 1-2 ประโยค สุภาพ สุขุม ลงท้าย 'ครับเจ้านาย' เสมอ"
                 )
-                self.model = genai.GenerativeModel("gemini-3.5-flash-lite", system_instruction=system_prompt)
+                self.model = genai.GenerativeModel("gemini-3.6-flash", system_instruction=system_prompt)
                 self.chat_session = self.model.start_chat(history=[])
                 print("🧠 [J.A.R.V.I.S. Brain]: เชื่อมต่อสมอง Gemini Flash บน Home Assistant สำเร็จ!")
             except Exception as e:
