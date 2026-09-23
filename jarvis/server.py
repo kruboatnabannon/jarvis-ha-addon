@@ -18,8 +18,8 @@ brain = JarvisHABrain()
 
 VERSION_INFO = {
     "status": "success",
-    "version": "2.7.1",
-    "version_code": 271,
+    "version": "2.7.2",
+    "version_code": 272,
     "release_name": "HA 24/7 Central Brain Core (Tailscale & Mobile Sync)",
     "platform": "Home Assistant OS",
     "server": "Home Assistant J.A.R.V.I.S. Central Brain"

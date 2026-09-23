@@ -1,6 +1,6 @@
-name: "J.A.R.V.I.S. Brain Core (v2.7.1)"
-description: "ระบบสมองกลาง AI ผู้ช่วยส่วนตัวรอบด้าน (J.A.R.V.I.S. v2.7.1) รันตลอด 24 ชม. บน Home Assistant OS รองรับคำสั่งเสียง อุปกรณ์บ้าน และเชื่อมต่อ Android / Mac / Tailscale"
-version: "2.7.1"
+name: "J.A.R.V.I.S. Brain Core (v2.7.2)"
+description: "ระบบสมองกลาง AI ผู้ช่วยส่วนตัวรอบด้าน (J.A.R.V.I.S. v2.7.2) รันตลอด 24 ชม. บน Home Assistant OS รองรับคำสั่งเสียง อุปกรณ์บ้าน และเชื่อมต่อ Android / Mac / Tailscale"
+version: "2.7.2"
 slug: "jarvis_brain"
 init: false
 arch:
