@@ -27,6 +27,11 @@ class JarvisHABrain:
         self.chat_session = None
         self.candidate_models = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.6-flash"]
         self.active_model_name = "gemini-3.5-flash-lite"
+        if self.api_key:
+            masked = self.api_key[:6] + "..." + self.api_key[-4:]
+            print(f"🔑 [J.A.R.V.I.S. HA Brain]: API Key ติดตั้งพร้อมใช้งาน ({masked})")
+        else:
+            print("⚠️ [J.A.R.V.I.S. HA Brain]: ไม่พบ Gemini API Key")
 
         self.init_gemini()
 

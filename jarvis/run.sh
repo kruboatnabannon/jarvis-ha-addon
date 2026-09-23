@@ -4,6 +4,7 @@ set -e
 echo "=================================================="
 echo "🤖 Starting J.A.R.V.I.S. Brain Core on Home Assistant..."
 echo "🏠 Machine: HP t620 (x86_64)"
+echo "📌 Version: v2.6.9 (Central Brain Core 24/7)"
 echo "=================================================="
 
 OPTIONS_FILE="/data/options.json"
